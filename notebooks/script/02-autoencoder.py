@@ -24,7 +24,14 @@ with open("config.yaml") as stream:
         print(exc)
 
 
-print("Hello, World!")
+# Initialize Dataset
+dataset_mic = SensorDataset(root_dir="datasets/BrushlessMotor", split="train", sensors=["mic"]) 
+dataloader_mic = DataLoader(dataset_mic, batch_size=64, shuffle=True, num_workers=2)
+
+
+from models import Autoencoder
+
+AE = Autoencoder()
 
 
 
