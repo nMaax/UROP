@@ -5,13 +5,13 @@ get_ipython().run_line_magic('load_ext', 'autoreload')
 get_ipython().run_line_magic('autoreload', '2')
 
 
-# import os
-# os.chdir("..")  # Go up one level to the UROP directory
-# print(os.getcwd())
+import os
+os.chdir("..")  # Go up one level to the UROP directory
+print(os.getcwd())
 
 
 import torch
-from utils import SensorDataset
+from utils import SensorDataset, LazyWindowedMultiSensorDataset
 from torch.utils.data import DataLoader
 import yaml
 
@@ -25,34 +25,34 @@ with open("config.yaml") as stream:
     except yaml.YAMLError as exc:
         print(exc)
 
-sensor = 'acc'
-sr = config['sampling_rate'][sensor]
-
 
 # Initialize Dataset
-dataset = SensorDataset(root_dir="datasets/BrushlessMotor", split="train", sensors=[sensor])
+dataset = LazyWindowedMultiSensorDataset(root_dir="datasets/BrushlessMotor", split="train", metadata_file="attributes_normal_source_train.csv")
 dataloader = DataLoader(dataset, batch_size=64, shuffle=True, num_workers=2)
 
 print(f"Number of samples in dataset: {len(dataset)}")
-print(dataset[0].shape)
-print(dataset[5].shape)
-print(dataset[6].shape)
-print(dataset[7].shape)
-
 print(f"Number of batches in dataloader: {len(dataloader)}")
 
 
 for batch_idx, data in enumerate(dataloader):
-    for sample in data:
-        print(sample.shape)
+    mic, acc, gyro, labels = data
+    print(f"Mic shape: {mic.shape}")
+    print(f"Acc shape: {acc.shape}")
+    print(f"Gyro shape: {gyro.shape}")
+    for key, value in labels.items():
+        print(f"Length of {key}: {len(value)}")
+    if batch_idx == 3:
+        break
+    else:
+        print()
 
 
 random_index = torch.randint(0, 64, (1,)).item()
-mel_spectrogram = librosa.feature.melspectrogram(y=data[random_index, :, 0].numpy(), sr=sr)
+mel_spectrogram = librosa.feature.melspectrogram(y=mic[random_index, :, 0].numpy(), sr=16000, n_fft=512, hop_length=256, n_mels=64)
 mel_log_spectrogram = librosa.power_to_db(mel_spectrogram)
 
 plt.figure()
-librosa.display.specshow(mel_log_spectrogram, x_axis='time', y_axis='mel', sr=sr, cmap='plasma')
+librosa.display.specshow(mel_log_spectrogram, x_axis='time', y_axis='mel', sr=1600, cmap='plasma')
 plt.colorbar(format='%+2.0f dB')
 plt.title('Mel-frequency spectrogram')
 plt.show()

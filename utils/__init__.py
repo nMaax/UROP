@@ -1,1 +1,2 @@
 from .dataset import SensorDataset
+from .LazyWindowedMultiSensorDataset import LazyWindowedMultiSensorDataset
