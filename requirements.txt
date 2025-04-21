@@ -1,3 +1,5 @@
+ipython==9.1.0
+nbautoexport==0.5.2
 pyyaml==6.0.2
 matplotlib==3.10.1
 numpy==2.1.3

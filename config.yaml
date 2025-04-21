@@ -1,4 +1,6 @@
-mic:
-  sample_rate: 16000
+sampling_rate:
+  mic:  16000
+  acc:  6700
+  gyro: 6700
 
 # ... TODO ...
