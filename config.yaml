@@ -1,6 +1,4 @@
-sampling_rate:
-  mic:  16000
-  acc:  6700
-  gyro: 6700
-
-# ... TODO ...
+batch_size: 128
+lr: 0.0001
+num_epochs: 2
+num_workers: 4

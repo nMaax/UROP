@@ -11,7 +11,7 @@ print(os.getcwd())
 
 
 import torch
-from utils import SensorDataset, LazyWindowedMultiSensorDataset
+from utils import LazyWindowedDataset
 from torch.utils.data import DataLoader
 import yaml
 
@@ -27,7 +27,7 @@ with open("config.yaml") as stream:
 
 
 # Initialize Dataset
-dataset = LazyWindowedMultiSensorDataset(root_dir="datasets/BrushlessMotor", split="train", metadata_file="attributes_normal_source_train.csv")
+dataset = LazyWindowedDataset(root_dir="datasets/BrushlessMotor", split="train", metadata_file="attributes_normal_source_train.csv")
 dataloader = DataLoader(dataset, batch_size=64, shuffle=True, num_workers=2)
 
 print(f"Number of samples in dataset: {len(dataset)}")
