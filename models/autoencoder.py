@@ -10,7 +10,7 @@ class BaselineAutoencoder(nn.Module):
 
         # Explicit layer dimensions for encoder and decoder
         self.encoder = nn.Sequential(
-            nn.Linear(input_dim, 2048),  # Input dim example: 4704 (e.g., flattened mic+acc+gyro window)
+            nn.Linear(input_dim, 2048),  
             nn.ReLU(),
             nn.Linear(2048, 2048),
             nn.ReLU(),

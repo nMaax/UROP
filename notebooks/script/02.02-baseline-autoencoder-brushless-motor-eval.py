@@ -36,7 +36,7 @@ test_source_dataset = LazyWindowedDataset(
     window_size_ms=100,
     stride_ms=50,
 )
-test_loader = DataLoader(test_source_dataset, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=True)
+test_loader = DataLoader(test_source_dataset, batch_size=batch_size, shuffle=False, num_workers=1, drop_last=True)
 
 
 from models import BaselineAutoencoder
@@ -45,6 +45,7 @@ from utils import evaluate, load_model_checkpoint
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 model, _, _, _, _, _ = load_model_checkpoint("checkpoints/BrushlessMotorBaseline.pt", BaselineAutoencoder, optimizer_class=None)
+model.to(device)
 criterion = torch.nn.MSELoss()
 
 

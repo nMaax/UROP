@@ -56,13 +56,14 @@ test_source_dataset = LazyWindowedDataset(
     window_size_ms=100,
     stride_ms=50,
 )
-test_loader = DataLoader(test_source_dataset, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=True)
+test_loader = DataLoader(test_source_dataset, batch_size=batch_size, shuffle=False, num_workers=1, drop_last=True)
 
 
 from models import BaselineAutoencoder
-from utils import train_one_epoch, evaluate, train_model, z_score_normalize, flatten_and_concat
+from utils import train_one_epoch, evaluate, train_model, z_score_normalize, flatten_and_concat, save_model_checkpoint
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
 
 model = BaselineAutoencoder()
 model.to(device)
@@ -76,7 +77,7 @@ print(f"Initial loss: {loss:.4f}, AUC: {auc:.4f}")
 
 
 model, train_losses, val_losses, val_aucs = train_model(
-    name="RoboticArm",
+    name="RoboticArm2",
     model=model,
     criterion=criterion,
     optimizer=optimizer,

@@ -27,11 +27,28 @@ with open("config.yaml") as stream:
 
 
 # Initialize Dataset
-dataset = LazyWindowedDataset(root_dir="datasets/BrushlessMotor", split="train", metadata_file="attributes_normal_source_train.csv")
-dataloader = DataLoader(dataset, batch_size=64, shuffle=True, num_workers=2)
+full_train_source_dataset = LazyWindowedDataset(
+    root_dir="datasets/BrushlessMotor",
+    split="train",
+    anomaly_type=['normal'],
+    domain_type=['source', 'target'],
+    window_size_ms=100,
+    stride_ms=50,
+)
+dataloader = DataLoader(full_train_source_dataset, batch_size=128, shuffle=True, num_workers=2)
 
-print(f"Number of samples in dataset: {len(dataset)}")
+print(f"Number of samples in dataset: {len(full_train_source_dataset)}")
 print(f"Number of batches in dataloader: {len(dataloader)}")
+
+
+import time
+total_time = 0
+start = time.time()
+for i, batch in enumerate(dataloader):
+    # optional: model(batch)
+    pass
+total_time += time.time() - start
+print(f"Total dataloader time: {total_time:.2f}s")
 
 
 for batch_idx, data in enumerate(dataloader):
