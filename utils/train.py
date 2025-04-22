@@ -44,10 +44,13 @@ def train_one_epoch(model, dataloader, optimizer, criterion, verbose=False):
 
     return running_loss / len(dataloader)  # Return average loss for the epoch
 
-def evaluate(model, dataloader, criterion):
+def evaluate(model, dataloader, criterion, sensors_to_test=None):
     """Function to evaluate the model on a validation dataset"""
     device = next(model.parameters()).device  # Get the device of the model
     
+    if sensors_to_test is None:
+        sensors_to_test = ['mic', 'acc', 'gyro']  # Default to using all sensors
+
     model.eval()  # Set the model to evaluation mode
     val_loss = 0.0  # Initialize validation loss
     segment_errors = defaultdict(list)  # Dictionary to store errors per segment
@@ -55,6 +58,11 @@ def evaluate(model, dataloader, criterion):
 
     with torch.no_grad():  # Disable gradient computation
         for mic, acc, gyro, labels in dataloader:
+            # Mask sensors not requested for testing
+            mic = mic if 'mic' in sensors_to_test else torch.zeros_like(mic)
+            acc = acc if 'acc' in sensors_to_test else torch.zeros_like(acc)
+            gyro = gyro if 'gyro' in sensors_to_test else torch.zeros_like(gyro)
+
             # Normalize input tensors
             mic_norm = z_score_normalize(mic)
             acc_norm = z_score_normalize(acc)

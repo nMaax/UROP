@@ -3,6 +3,9 @@ checkpoints/
 data/
 datasets/
 
+# Ignore pictures
+figures/
+
 # Ignore wandb processes
 wandb/
 
