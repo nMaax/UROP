@@ -52,7 +52,7 @@ mel_spectrogram = librosa.feature.melspectrogram(y=mic[random_index, :, 0].numpy
 mel_log_spectrogram = librosa.power_to_db(mel_spectrogram)
 
 plt.figure()
-librosa.display.specshow(mel_log_spectrogram, x_axis='time', y_axis='mel', sr=1600, cmap='plasma')
+librosa.display.specshow(mel_log_spectrogram, x_axis='time', y_axis='mel', sr=16000, cmap='plasma')
 plt.colorbar(format='%+2.0f dB')
 plt.title('Mel-frequency spectrogram')
 plt.show()
