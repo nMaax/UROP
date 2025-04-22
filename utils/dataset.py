@@ -60,7 +60,6 @@ class LazyWindowedDataset(Dataset):
 
         # Load metadata and parquet files
         self.data_path = os.path.join(root_dir, split)
-
         meta_path_format = "attributes_{anomaly}_{domain}_{split}.csv"
         meta_dfs = []
         for anomaly in self.anomaly_types:
@@ -187,16 +186,3 @@ class LazyWindowedDataset(Dataset):
         gyro_window = self._pad_to_length(gyro_window, w_g)
 
         return mic_window, acc_window, gyro_window, entry['labels']
-
-if __name__ == "__main__":
-    ds = LazyWindowedDataset(
-        root_dir='datasets/BrushlessMotor',
-        split='train',
-        metadata_file='metadata.csv',
-        window_size_ms=100,
-        stride_ms=50
-    )
-    print(f"Total windows: {len(ds)}")
-    mic_w, acc_w, gyro_w, labels = ds[0]
-    print(f"Mic window frames: {mic_w.shape}")
-    print(f"Labels: {labels}")

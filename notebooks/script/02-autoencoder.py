@@ -69,10 +69,11 @@ criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
 
-evaluate(model, test_loader, criterion)
+loss, auc = evaluate(model, test_loader, criterion)
+print(f"Initial loss: {loss:.4f}, AUC: {auc:.4f}")
 
 
-train_model(
+model, train_losses, val_losses, val_aucs = train_model(
     model=model,
     criterion=criterion,
     optimizer=optimizer,
@@ -83,7 +84,8 @@ train_model(
 )
 
 
-evaluate(model, test_loader, criterion)
+loss, auc = evaluate(model, test_loader, criterion)
+print(f"Final loss: {loss:.4f}, AUC: {auc:.4f}")
 
 
 
