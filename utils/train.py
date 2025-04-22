@@ -108,7 +108,7 @@ def evaluate(model, dataloader, criterion, sensors_to_test=None):
     
     return val_loss, val_auc  # Return validation loss and AUC
 
-def save_model_checkpoint(save_dir, model, config, optimizer, epoch, train_losses, val_losses, val_aucs):
+def save_model_checkpoint(save_dir, name, model, config, optimizer, epoch, train_losses, val_losses, val_aucs):
     """Save the model checkpoint"""
     
     if not os.path.exists(save_dir):
@@ -127,7 +127,7 @@ def save_model_checkpoint(save_dir, model, config, optimizer, epoch, train_losse
         'val_aucs': val_aucs,
     }
 
-    checkpoint_path = os.path.join(save_dir, f"{model_class_name}_epoch_{epoch}.pt")
+    checkpoint_path = os.path.join(save_dir, f"{name}_{model_class_name}_epoch_{epoch}.pt")
     torch.save(checkpoint, checkpoint_path)
     print(f"Checkpoint saved at {checkpoint_path}")
 
@@ -165,7 +165,7 @@ def load_model_checkpoint(checkpoint_path, model_class, optimizer_class=None):
     return model, optimizer, checkpoint['epoch'], checkpoint['train_losses'], checkpoint['val_losses'], checkpoint['val_aucs']
 
 
-def train_model(model, criterion, optimizer, train_loader, val_loader, num_epochs=10, save_every=1, save_dir='checkpoints', verbose=True):
+def train_model(name, model, criterion, optimizer, train_loader, val_loader, num_epochs=10, save_every=1, save_dir='checkpoints', verbose=True):
     """Function to train the model for multiple epochs"""
     train_losses, val_losses, val_aucs = [], [], []  # Initialize lists to store metrics
 
@@ -202,6 +202,6 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, num_epoch
 
         if save_every and (epoch + 1) % save_every == 0:
             # Save model checkpoint periodically
-            save_model_checkpoint(save_dir, model, model_config, optimizer, epoch + 1, train_losses, val_losses, val_aucs)
+            save_model_checkpoint(save_dir, name, model, model_config, optimizer, epoch + 1, train_losses, val_losses, val_aucs)
 
     return model, train_losses, val_losses, val_aucs  # Return trained model and metrics

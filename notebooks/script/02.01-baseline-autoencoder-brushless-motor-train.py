@@ -76,6 +76,7 @@ print(f"Initial loss: {loss:.4f}, AUC: {auc:.4f}")
 
 
 model, train_losses, val_losses, val_aucs = train_model(
+    name="BrushlessMotor",
     model=model,
     criterion=criterion,
     optimizer=optimizer,
