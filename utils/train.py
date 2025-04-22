@@ -190,9 +190,9 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, num_epoch
 
         # Print metrics for the current epoch
         print(f"Epoch [{epoch+1}/{num_epochs}] | Train Loss: {train_loss:.6f} | Val Loss: {val_loss:.6f} | Val AUC: {val_auc:.4f}")
-        print(f"Time Spent: {epoch_time:.2f}s | ETA: {eta:.2f}s")
+        print(f"Time Spent: {epoch_time:.2f}s | ETA: {eta:.2f}s | Current Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
 
-        if save_every and epoch % save_every == 0:
+        if save_every and (epoch + 1) % save_every == 0:
             # Save model checkpoint periodically
             save_model_checkpoint(save_dir, model, model_config, optimizer, epoch + 1, train_losses, val_losses, val_aucs)
 

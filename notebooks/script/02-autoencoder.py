@@ -81,8 +81,8 @@ model, train_losses, val_losses, val_aucs = train_model(
     optimizer=optimizer,
     train_loader=train_loader,
     val_loader=val_loader,
-    num_epochs=num_epochs,
-    save_every=save_every,
+    num_epochs=20,
+    save_every=5,
     save_dir=save_dir,
     verbose=False,
 )
