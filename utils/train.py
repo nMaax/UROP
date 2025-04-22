@@ -1,8 +1,9 @@
+import os
+import time
+import warnings
 import torch
 from sklearn.metrics import roc_auc_score
 from collections import defaultdict
-import os
-import warnings
 
 def z_score_normalize(tensor):
     """Normalize a tensor using z-score normalization"""
@@ -155,6 +156,7 @@ def load_model_checkpoint(checkpoint_path, model_class, optimizer_class=None):
     # Return model, optimizer, and saved training metrics
     return model, optimizer, checkpoint['epoch'], checkpoint['train_losses'], checkpoint['val_losses'], checkpoint['val_aucs']
 
+
 def train_model(model, criterion, optimizer, train_loader, val_loader, num_epochs=10, save_every=1, save_dir='checkpoints', verbose=True):
     """Function to train the model for multiple epochs"""
     train_losses, val_losses, val_aucs = [], [], []  # Initialize lists to store metrics
@@ -170,9 +172,16 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, num_epoch
         if verbose:
             print(f"\nEpoch {epoch+1}/{num_epochs}")
 
+        # Start timing the epoch
+        start_time = time.time()
+
         # Train for one epoch and evaluate on validation set
         train_loss = train_one_epoch(model, train_loader, optimizer, criterion, verbose)
         val_loss, val_auc = evaluate(model, val_loader, criterion)
+
+        # End timing the epoch
+        epoch_time = time.time() - start_time
+        eta = epoch_time * (num_epochs - epoch - 1)
 
         # Store metrics
         train_losses.append(train_loss)
@@ -181,6 +190,7 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, num_epoch
 
         # Print metrics for the current epoch
         print(f"Epoch [{epoch+1}/{num_epochs}] | Train Loss: {train_loss:.6f} | Val Loss: {val_loss:.6f} | Val AUC: {val_auc:.4f}")
+        print(f"Time Spent: {epoch_time:.2f}s | ETA: {eta:.2f}s")
 
         if save_every and epoch % save_every == 0:
             # Save model checkpoint periodically
