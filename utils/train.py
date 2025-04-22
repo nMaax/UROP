@@ -1,11 +1,12 @@
 import torch
 from sklearn.metrics import roc_auc_score
 from collections import defaultdict
+import os
 import warnings
 
 def z_score_normalize(tensor):
     """Normalize a tensor using z-score normalization"""
-    mean = tensor.mean(dim=1, keepdim=True) # Tensor.shape = (Batch, Time, Channels)
+    mean = tensor.mean(dim=1, keepdim=True)  # Tensor.shape = (Batch, Time, Channels)
     std = tensor.std(dim=1, keepdim=True) + 1e-8  # Add small value to avoid division by zero
     return (tensor - mean) / std
 
@@ -98,9 +99,72 @@ def evaluate(model, dataloader, criterion):
     
     return val_loss, val_auc  # Return validation loss and AUC
 
-def train_model(model, criterion, optimizer, train_loader, val_loader, num_epochs=10, verbose=True):
+def save_model_checkpoint(save_dir, model, config, optimizer, epoch, train_losses, val_losses, val_aucs):
+    """Save the model checkpoint"""
+    
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
+    model_class_name = model.__class__.__name__
+
+    checkpoint = {
+        'epoch': epoch,
+        'model_class_name': model_class_name,
+        'config': config,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'train_losses': train_losses,
+        'val_losses': val_losses,
+        'val_aucs': val_aucs,
+    }
+
+    checkpoint_path = os.path.join(save_dir, f"{model_class_name}_epoch_{epoch}.pt")
+    torch.save(checkpoint, checkpoint_path)
+    print(f"Checkpoint saved at {checkpoint_path}")
+
+
+def load_model_checkpoint(checkpoint_path, model_class, optimizer_class=None):
+    """Load the model from a checkpoint file and return the model, optimizer, and training metrics"""
+    if not os.path.exists(checkpoint_path):
+        raise FileNotFoundError(f"Checkpoint not found at {checkpoint_path}")
+
+    # Load checkpoint
+    checkpoint = torch.load(checkpoint_path)
+
+    # Retrieve the model class name and config from checkpoint
+    model_class_name = checkpoint['model_class_name']
+    model_config = checkpoint['config']
+
+    # Ensure that the checkpoint's model class matches the passed class name
+    if model_class_name != model_class.__name__:
+        raise ValueError(f"Checkpoint model class {model_class_name} does not match the provided model class {model_class.__name__}")
+
+    # Recreate the model using the saved config
+    model = model_class.from_config(model_config)
+
+    # Load the model state dict (weights)
+    model.load_state_dict(checkpoint['model_state_dict'])
+
+    # Ensure the optimizer class matches the expected class
+    if optimizer_class and 'optimizer_state_dict' in checkpoint:
+        optimizer = optimizer_class(model.parameters())  # Initialize optimizer
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    else:
+        optimizer = None  # If no optimizer state is saved, return None
+
+    # Return model, optimizer, and saved training metrics
+    return model, optimizer, checkpoint['epoch'], checkpoint['train_losses'], checkpoint['val_losses'], checkpoint['val_aucs']
+
+def train_model(model, criterion, optimizer, train_loader, val_loader, num_epochs=10, save_every=1, save_dir='checkpoints', verbose=True):
     """Function to train the model for multiple epochs"""
     train_losses, val_losses, val_aucs = [], [], []  # Initialize lists to store metrics
+
+    # Get model config
+    if hasattr(model, 'get_config'):
+        model_config = model.get_config()
+    else:
+        warnings.warn(f"{model.__class__.__name__} does not have a 'get_config' method. Setting model_config to None.")
+        model_config = None
 
     for epoch in range(num_epochs):
         if verbose:
@@ -117,5 +181,9 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, num_epoch
 
         # Print metrics for the current epoch
         print(f"Epoch [{epoch+1}/{num_epochs}] | Train Loss: {train_loss:.6f} | Val Loss: {val_loss:.6f} | Val AUC: {val_auc:.4f}")
+
+        if save_every and epoch % save_every == 0:
+            # Save model checkpoint periodically
+            save_model_checkpoint(save_dir, model, model_config, optimizer, epoch + 1, train_losses, val_losses, val_aucs)
 
     return model, train_losses, val_losses, val_aucs  # Return trained model and metrics

@@ -1,1 +1,1 @@
-from .autoencoder import Autoencoder
+from .autoencoder import BaselineAutoencoder

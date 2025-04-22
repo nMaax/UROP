@@ -25,6 +25,8 @@ with open("config.yaml") as stream:
 batch_size = config["batch_size"]
 lr = config["lr"]
 num_epochs = config["num_epochs"]
+save_every = config["save_every"]
+save_dir = config["save_dir"]
 num_workers = config["num_workers"]
 
 
@@ -57,12 +59,12 @@ test_source_dataset = LazyWindowedDataset(
 test_loader = DataLoader(test_source_dataset, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=True)
 
 
-from models import Autoencoder
+from models import BaselineAutoencoder
 from utils import train_one_epoch, evaluate, train_model, z_score_normalize, flatten_and_concat
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = Autoencoder()
+model = BaselineAutoencoder()
 model.to(device)
 
 criterion = torch.nn.MSELoss()
@@ -80,6 +82,8 @@ model, train_losses, val_losses, val_aucs = train_model(
     train_loader=train_loader,
     val_loader=val_loader,
     num_epochs=num_epochs,
+    save_every=save_every,
+    save_dir=save_dir,
     verbose=False,
 )
 

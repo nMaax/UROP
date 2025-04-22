@@ -1,9 +1,12 @@
 import torch
 import torch.nn as nn
 
-class Autoencoder(nn.Module):
+class BaselineAutoencoder(nn.Module):
     def __init__(self, input_dim=5620):
         super().__init__()
+
+        # Store configuration for later use (in get_config)
+        self.config = {'input_dim': input_dim}
 
         # Explicit layer dimensions for encoder and decoder
         self.encoder = nn.Sequential(
@@ -30,11 +33,12 @@ class Autoencoder(nn.Module):
         latent = self.encoder(x)
         reconstructed = self.decoder(latent)
         return reconstructed
+    
+    def get_config(self):
+        """Returns the configuration of the model as a dictionary"""
+        return self.config
 
-# Example usage
-if __name__ == "__main__":
-    model = Autoencoder()
-    dummy_input = torch.randn(32, 4704)  # Example batch size of 32
-    output = model(dummy_input)
-    print("Input shape:", dummy_input.shape)
-    print("Output shape:", output.shape)
+    @classmethod
+    def from_config(cls, config):
+        """Creates a new model instance from the provided configuration dictionary"""
+        return cls(input_dim=config['input_dim'])
