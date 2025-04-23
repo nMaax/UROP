@@ -52,19 +52,19 @@ criterion = torch.nn.MSELoss()
 # ![alt text](figures/brushlessMotorHighlightedTable.png)
 
 loss, auc = evaluate(model, test_loader, criterion)
-print(f"Final loss: {loss:.4f}, AUC: {auc:.4f}")
+print(f"Overall S+T | Loss: {loss:.4f}, AUC: {auc:.4f}")
 
 
 acc_loss, acc_auc = evaluate(model, test_loader, criterion, sensors_to_test=['acc'])
-print(f"Final loss: {acc_loss:.4f}, AUC: {acc_auc:.4f}")
+print(f"Acc s+T | Loss: {acc_loss:.4f}, AUC: {acc_auc:.4f}")
 
 
 gyro_loss, gyro_auc = evaluate(model, test_loader, criterion, sensors_to_test=['gyro'])
-print(f"Final loss: {gyro_loss:.4f}, AUC: {gyro_auc:.4f}")
+print(f"Gyro S+T | Loss: {gyro_loss:.4f}, AUC: {gyro_auc:.4f}")
 
 
 mic_loss, mic_auc = evaluate(model, test_loader, criterion, sensors_to_test=['mic'])
-print(f"Final loss: {mic_loss:.4f}, AUC: {mic_auc:.4f}")
+print(f"Mic S+T | Loss: {mic_loss:.4f}, AUC: {mic_auc:.4f}")
 
 
 

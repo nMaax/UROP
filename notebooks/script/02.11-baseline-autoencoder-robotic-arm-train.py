@@ -60,12 +60,13 @@ test_loader = DataLoader(test_source_dataset, batch_size=batch_size, shuffle=Fal
 
 
 from models import BaselineAutoencoder
-from utils import train_one_epoch, evaluate, train_model, z_score_normalize, flatten_and_concat, save_model_checkpoint
+from utils import train_model, evaluate, save_model_checkpoint, load_model_checkpoint
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-model = BaselineAutoencoder()
+model, optimizer, start_epoch, _, _, _ = load_model_checkpoint("checkpoints/RoboticArm_BaselineAutoencoder_epoch_5.pt", BaselineAutoencoder, None)
+print(f"Loaded model from epoch {start_epoch}")
 model.to(device)
 
 criterion = torch.nn.MSELoss()
@@ -83,8 +84,9 @@ model, train_losses, val_losses, val_aucs = train_model(
     optimizer=optimizer,
     train_loader=train_loader,
     val_loader=val_loader,
-    num_epochs=20,
-    save_every=5,
+    start_epoch=start_epoch,
+    num_epochs=10,
+    save_every=3,
     save_dir=save_dir,
     verbose=False,
 )

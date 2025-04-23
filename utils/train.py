@@ -165,7 +165,9 @@ def load_model_checkpoint(checkpoint_path, model_class, optimizer_class=None):
     return model, optimizer, checkpoint['epoch'], checkpoint['train_losses'], checkpoint['val_losses'], checkpoint['val_aucs']
 
 
-def train_model(name, model, criterion, optimizer, train_loader, val_loader, num_epochs=10, save_every=1, save_dir='checkpoints', verbose=True):
+def train_model(name, model, criterion, optimizer, train_loader, val_loader,
+                start_epoch=0, num_epochs=10, save_every=1, 
+                save_dir='checkpoints', verbose=True):
     """Function to train the model for multiple epochs"""
     train_losses, val_losses, val_aucs = [], [], []  # Initialize lists to store metrics
 
@@ -177,8 +179,7 @@ def train_model(name, model, criterion, optimizer, train_loader, val_loader, num
         model_config = None
 
     for epoch in range(num_epochs):
-        if verbose:
-            print(f"\nEpoch {epoch+1}/{num_epochs}")
+        adjusted_current_epoch = start_epoch + epoch
 
         # Start timing the epoch
         start_time = time.time()
@@ -197,11 +198,12 @@ def train_model(name, model, criterion, optimizer, train_loader, val_loader, num
         val_aucs.append(val_auc)
 
         # Print metrics for the current epoch
-        print(f"Epoch [{epoch+1}/{num_epochs}] | Train Loss: {train_loss:.6f} | Val Loss: {val_loss:.6f} | Val AUC: {val_auc:.4f}")
+        print(f"Epoch [{epoch + 1}/{num_epochs}] (Checkpoint Epoch: {adjusted_current_epoch + 1}) | Train Loss: {train_loss:.6f} | Val Loss: {val_loss:.6f} | Val AUC: {val_auc:.4f}")
         print(f"Time Spent: {epoch_time:.2f}s | ETA: {eta:.2f}s | Current Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
 
-        if save_every and (epoch + 1) % save_every == 0:
-            # Save model checkpoint periodically
-            save_model_checkpoint(save_dir, name, model, model_config, optimizer, epoch + 1, train_losses, val_losses, val_aucs)
+        if (save_every and (epoch + 1) % save_every == 0) or (epoch == num_epochs - 1):
+            # Save model checkpoint periodically with adjusted epoch
+            save_model_checkpoint(save_dir, name, model, model_config, optimizer,
+                                  adjusted_current_epoch + 1, train_losses, val_losses, val_aucs)
 
     return model, train_losses, val_losses, val_aucs  # Return trained model and metrics
