@@ -4,7 +4,7 @@ data/
 datasets/
 
 # Ignore pictures
-figures/
+figures/*
 
 # Ignore wandb processes
 wandb/
