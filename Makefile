@@ -82,9 +82,9 @@ clean:
 .PHONY: data
 data: requirements
 	@echo ""
-	@echo "⬇️  Downloading dataset with fl_g13.dataset..."
+	@echo "⬇️  Downloading dataset..."
 	@echo ""
-	$(PYTHON) -m fl_g13.dataset
+	$(PYTHON) -m utils.download_and_extract
 	@echo ""
 	@echo "✅ Dataset downloaded successfully."
 	@echo ""
@@ -110,7 +110,6 @@ define PRINT_HELP_PYSCRIPT
 import re, sys; \
 lines = '\n'.join([line for line in sys.stdin]); \
 matches = re.findall(r'\n## (.*)\n[\s\S]+?\n([a-zA-Z_-]+):', lines); \
-print('Available rules:\n'); \
 print('\n'.join(['{:25}{}'.format(*reversed(match)) for match in matches]))
 endef
 export PRINT_HELP_PYSCRIPT
