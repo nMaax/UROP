@@ -1,3 +1,6 @@
+# Ignore personal files
+notes.txt
+
 # Ignore checkpoints, data and datasets
 checkpoints/
 data/
