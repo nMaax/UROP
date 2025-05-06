@@ -11,7 +11,7 @@ print(os.getcwd())
 
 
 import torch
-from utils import LazyWindowedDataset
+from src import LazyWindowedDataset
 from torch.utils.data import DataLoader
 import yaml
 

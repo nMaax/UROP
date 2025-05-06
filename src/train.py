@@ -4,16 +4,8 @@ import warnings
 import torch
 from sklearn.metrics import roc_auc_score
 from collections import defaultdict
-
-def z_score_normalize(tensor):
-    """Normalize a tensor using z-score normalization"""
-    mean = tensor.mean(dim=1, keepdim=True)  # Tensor.shape = (Batch, Time, Channels)
-    std = tensor.std(dim=1, keepdim=True) + 1e-8  # Add small value to avoid division by zero
-    return (tensor - mean) / std
-
-def flatten_and_concat(*tensors):
-    """Flatten tensors and concatenate them along the feature dimension"""
-    return torch.cat([t.view(t.size(0), -1) for t in tensors], dim=1)
+from src.utils import minmax_normalize, z_score_normalize, flatten_and_concat, adjust_time_series_size
+from src.save import save_model_checkpoint
 
 def train_one_epoch(model, dataloader, optimizer, criterion, verbose=False):
     """Train the model for one epoch"""
@@ -44,7 +36,7 @@ def train_one_epoch(model, dataloader, optimizer, criterion, verbose=False):
 
     return running_loss / len(dataloader)  # Return average loss for the epoch
 
-def evaluate(model, dataloader, criterion, sensors_to_test=None):
+def evaluate(model, dataloader, criterion, sensors_to_test=None, verbose=False):
     """Function to evaluate the model on a validation dataset"""
     device = next(model.parameters()).device  # Get the device of the model
     
@@ -108,63 +100,6 @@ def evaluate(model, dataloader, criterion, sensors_to_test=None):
     
     return val_loss, val_auc  # Return validation loss and AUC
 
-def save_model_checkpoint(save_dir, name, model, config, optimizer, epoch, train_losses, val_losses, val_aucs):
-    """Save the model checkpoint"""
-    
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-
-    model_class_name = model.__class__.__name__
-
-    checkpoint = {
-        'epoch': epoch,
-        'model_class_name': model_class_name,
-        'config': config,
-        'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
-        'train_losses': train_losses,
-        'val_losses': val_losses,
-        'val_aucs': val_aucs,
-    }
-
-    checkpoint_path = os.path.join(save_dir, f"{name}_{model_class_name}_epoch_{epoch}.pt")
-    torch.save(checkpoint, checkpoint_path)
-    print(f"Checkpoint saved at {checkpoint_path}")
-
-
-def load_model_checkpoint(checkpoint_path, model_class, optimizer_class=None):
-    """Load the model from a checkpoint file and return the model, optimizer, and training metrics"""
-    if not os.path.exists(checkpoint_path):
-        raise FileNotFoundError(f"Checkpoint not found at {checkpoint_path}")
-
-    # Load checkpoint
-    checkpoint = torch.load(checkpoint_path)
-
-    # Retrieve the model class name and config from checkpoint
-    model_class_name = checkpoint['model_class_name']
-    model_config = checkpoint['config']
-
-    # Ensure that the checkpoint's model class matches the passed class name
-    if model_class_name != model_class.__name__:
-        raise ValueError(f"Checkpoint model class {model_class_name} does not match the provided model class {model_class.__name__}")
-
-    # Recreate the model using the saved config
-    model = model_class.from_config(model_config)
-
-    # Load the model state dict (weights)
-    model.load_state_dict(checkpoint['model_state_dict'])
-
-    # Ensure the optimizer class matches the expected class
-    if optimizer_class and 'optimizer_state_dict' in checkpoint:
-        optimizer = optimizer_class(model.parameters())  # Initialize optimizer
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    else:
-        optimizer = None  # If no optimizer state is saved, return None
-
-    # Return model, optimizer, and saved training metrics
-    return model, optimizer, checkpoint['epoch'], checkpoint['train_losses'], checkpoint['val_losses'], checkpoint['val_aucs']
-
-
 def train_model(name, model, criterion, optimizer, train_loader, val_loader,
                 start_epoch=0, num_epochs=10, save_every=1, 
                 save_dir='checkpoints', verbose=True):
@@ -186,7 +121,7 @@ def train_model(name, model, criterion, optimizer, train_loader, val_loader,
 
         # Train for one epoch and evaluate on validation set
         train_loss = train_one_epoch(model, train_loader, optimizer, criterion, verbose)
-        val_loss, val_auc = evaluate(model, val_loader, criterion)
+        val_loss, val_auc = evaluate(model, val_loader, criterion, ['mic', 'acc', 'gyro'], verbose)
 
         # End timing the epoch
         epoch_time = time.time() - start_time

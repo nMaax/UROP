@@ -30,7 +30,7 @@ save_dir = config["save_dir"]
 num_workers = config["num_workers"]
 
 
-from utils import LazyWindowedDataset, train_test_split
+from src import LazyWindowedDataset, train_test_split
 
 # Initialize Dataset
 full_train_source_dataset = LazyWindowedDataset(
@@ -60,7 +60,7 @@ test_loader = DataLoader(test_source_dataset, batch_size=batch_size, shuffle=Fal
 
 
 from models import BaselineAutoencoder
-from utils import train_model, evaluate, save_model_checkpoint, load_model_checkpoint
+from src import train_model, evaluate, save_model_checkpoint, load_model_checkpoint
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")

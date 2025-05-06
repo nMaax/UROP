@@ -26,7 +26,7 @@ num_workers = config["num_workers"]
 
 import torch
 from torch.utils.data import DataLoader
-from utils import LazyWindowedDataset
+from src import LazyWindowedDataset
 
 test_source_dataset = LazyWindowedDataset(
     root_dir="datasets/RoboticArm",
@@ -40,7 +40,7 @@ test_loader = DataLoader(test_source_dataset, batch_size=batch_size, shuffle=Tru
 
 
 from models import BaselineAutoencoder
-from utils import evaluate, load_model_checkpoint
+from src import evaluate, load_model_checkpoint
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
