@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# Work based on "TranAD: Deep Transformer Networks for Anomaly Detection in Multivariate Time Series Dat" by Tuli et. al. https://arxiv.org/abs/2201.07284
+# Original implementation https://github.com/imperial-qore/TranAD
+
+
 get_ipython().run_line_magic('load_ext', 'autoreload')
 get_ipython().run_line_magic('autoreload', '2')
 
