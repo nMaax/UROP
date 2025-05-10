@@ -10,7 +10,7 @@ os.chdir("..")  # Go up one level to the UROP directory
 
 # Hyper parameters and settings
 SEED = 1
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 NUM_WORKERS = 4
 LR = 1e-3
 
@@ -27,7 +27,7 @@ full_train_source_dataset = LazyWindowedDataset(
     split="train",
     anomaly_type=['normal'],
     domain_type=['source', 'target'],
-    window_size_ms=100,
+    window_size_ms=50,
     stride_ms=50,
 )
 
@@ -107,13 +107,14 @@ from src import train_model, adjust_time_series_size, minmax_normalize, save_mod
 from torch.nn import MSELoss
 from torch.optim import AdamW
 
-def train_one_epoch(model, dataloader, optimizer, criterion, verbose=False):
+def train_one_epoch(model, n, dataloader, optimizer, criterion, verbose=False):
     """Train the model for one epoch"""
     device = next(model.parameters()).device  # Get the device of the model
 
     model.train()  # Set the model to training mode
     running_loss = 0.0  # Initialize running loss
 
+    l1s = []
     for batch_idx, (mic, acc, gyro, labels) in enumerate(dataloader):
         # Normalize input tensors
         time_size = mic.shape[1]
@@ -124,20 +125,26 @@ def train_one_epoch(model, dataloader, optimizer, criterion, verbose=False):
 
         # Concatenate inputs
         inputs = torch.cat([mic_norm, acc_norm, gyro_norm], dim=2).to(device)
-        print(inputs.shape)
+        # print(inputs.shape)
 
         local_bs = inputs.shape[0]
         window = inputs.permute(1, 0, 2)
-        print(window.shape)
+        # print(window.shape)
         elem = window[-1, :, :].unsqueeze(dim=0)
-        print(elem.shape)
-        print(local_bs, feat_size)
+        # print(elem.shape)
+        # print(local_bs, feat_size)
         elem = elem.view(1, local_bs, feat_size)
 
         optimizer.zero_grad()  # Reset gradients
         outputs = model(window, elem)  # Forward pass on [128, 1600, 7]
-        loss = criterion(outputs, inputs)  # Compute loss
-        print(loss.shape)
+        print(f"{type(outputs)=}")
+        # print(f"{outputs.shape=}")
+        # print(f"{type(inputs)}, {inputs.shape}")
+        l1 = criterion(outputs, elem) if not isinstance(outputs, tuple) else (1 / n) * criterion(outputs[0], elem) + (1 - 1/n) * criterion(outputs[1], elem)
+        l1s.append(torch.mean(l1).item())
+        #loss = criterion(outputs, inputs)  # Compute loss
+        #print(loss.shape)
+        loss = l1.mean()
         loss.backward()  # Backward pass
         optimizer.step()  # Update model parameters
 
@@ -168,7 +175,8 @@ def train_model(name, model, criterion, optimizer, train_loader, val_loader,
         start_time = time.time()
 
         # Train for one epoch and evaluate on validation set
-        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, verbose)
+        n = epoch + 1
+        train_loss = train_one_epoch(model, n, train_loader, optimizer, criterion, verbose)
         # val_loss, val_auc = evaluate(model, val_loader, criterion, ['mic', 'acc', 'gyro'], verbose)
 
         # End timing the epoch
@@ -181,7 +189,7 @@ def train_model(name, model, criterion, optimizer, train_loader, val_loader,
         # val_aucs.append(val_auc)
 
         # Print metrics for the current epoch
-        print(f"Epoch [{epoch + 1}/{num_epochs}] (Checkpoint Epoch: {adjusted_current_epoch + 1}) | Train Loss: {train_loss:.6f} | Val Loss: {val_loss:.6f} | Val AUC: {val_auc:.4f}")
+        print(f"Epoch [{epoch + 1}/{num_epochs}] (Checkpoint Epoch: {adjusted_current_epoch + 1}) | Train Loss: {train_loss:.6f}")# | Val Loss: {val_loss:.6f} | Val AUC: {val_auc:.4f}")
         print(f"Time Spent: {epoch_time:.2f}s | ETA: {eta:.2f}s | Current Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
 
         if (save_every and (epoch + 1) % save_every == 0) or (epoch == num_epochs - 1):
@@ -194,15 +202,16 @@ def train_model(name, model, criterion, optimizer, train_loader, val_loader,
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 model = TranAD(
-    feats=7, # number of features
-    n_window=1600, # window size
+    feats=7,        # number of features
+    n_window=1600,  # window size
 ).to(device)
 optimizer = AdamW(model.parameters(), lr=LR)
+criterion = nn.MSELoss(reduction='none')
 
 train_model(
     name="TranAD",
     model=model,
-    criterion=MSELoss,
+    criterion=criterion,
     optimizer=optimizer,
     train_loader=train_loader,
     val_loader=None,
