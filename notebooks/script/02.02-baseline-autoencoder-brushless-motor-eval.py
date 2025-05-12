@@ -49,6 +49,10 @@ model.to(device)
 criterion = torch.nn.MSELoss()
 
 
+from torchinfo import summary
+summary(model, (batch_size, 5620))
+
+
 # ![alt text](figures/brushlessMotorHighlightedTable.png)
 
 loss, auc = evaluate(model, test_loader, criterion)

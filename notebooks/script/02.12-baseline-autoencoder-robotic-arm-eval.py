@@ -48,20 +48,24 @@ model, _, _, _, _, _ = load_model_checkpoint("checkpoints/RoboticArmBaseline.pt"
 criterion = torch.nn.MSELoss()
 
 
+from torchinfo import summary
+summary(model, (batch_size, 5620))
+
+
 # ![alt text](figures/roboticArmHighlightedTable.png)
 
-loss, auc = evaluate(model, test_loader, criterion)
+loss, auc = evaluate(model, test_loader, criterion, verbose=1)
 print(f"Overall S+T | Loss: {loss:.4f}, AUC: {auc:.4f}")
 
 
-acc_loss, acc_auc = evaluate(model, test_loader, criterion, sensors_to_test=['acc'])
+acc_loss, acc_auc = evaluate(model, test_loader, criterion, sensors_to_test=['acc'], verbose=1)
 print(f"Acc S+T | Loss: {acc_loss:.4f}, AUC: {acc_auc:.4f}")
 
 
-gyro_loss, gyro_auc = evaluate(model, test_loader, criterion, sensors_to_test=['gyro'])
+gyro_loss, gyro_auc = evaluate(model, test_loader, criterion, sensors_to_test=['gyro'], verbose=1)
 print(f"Gyro S+T | Loss: {gyro_loss:.4f}, AUC: {gyro_auc:.4f}")
 
 
-mic_loss, mic_auc = evaluate(model, test_loader, criterion, sensors_to_test=['mic'])
+mic_loss, mic_auc = evaluate(model, test_loader, criterion, sensors_to_test=['mic'], verbose=1)
 print(f"Mic S+T | Loss: {mic_loss:.4f}, AUC: {mic_auc:.4f}")
 
