@@ -16,7 +16,7 @@ def z_score_normalize(tensor):
 
 def flatten_and_concat(*tensors):
     """Flatten tensors and concatenate them along the feature dimension"""
-    return torch.cat([t.view(t.size(0), -1) for t in tensors], dim=1)
+    return torch.cat([t.view(t.size(0), -1) for t in tensors], dim=1).unsqueeze(-1) # Will return (batch, time), without dim
 
 def adjust_time_series_size(tensor, target_length, mode='zero'):
     """
@@ -41,6 +41,12 @@ def adjust_time_series_size(tensor, target_length, mode='zero'):
             padding = tensor[:, :1, :].repeat(1, pad_size, 1)
         elif mode == 'repeat_end':
             padding = tensor[:, -1:, :].repeat(1, pad_size, 1)
+        elif mode == 'balanced':
+            # Balanced padding
+            indices = torch.linspace(0, current_length - 1, steps=target_length, device=tensor.device).long()
+            tensor = tensor[:, indices, :]
+            return tensor
+        #TODO! Use time series coeherent rule for extending
         else:
             raise ValueError(f"Unsupported padding mode: {mode}")
         return torch.cat([padding, tensor], dim=1) if mode == 'repeat_start' else torch.cat([tensor, padding], dim=1)
