@@ -1,4 +1,6 @@
 import torch
+from scipy.signal import resample_poly
+
 
 def minmax_normalize(tensor, min_val=0.0, max_val=1.0):
     """Normalize a tensor using min-max normalization"""
@@ -18,7 +20,7 @@ def flatten_and_concat(*tensors):
     """Flatten tensors and concatenate them along the feature dimension"""
     return torch.cat([t.view(t.size(0), -1) for t in tensors], dim=1).unsqueeze(-1) # Will return (batch, time), without dim
 
-def adjust_time_series_size(tensor, target_length, mode='zero'):
+def adjust_time_series_size(tensor, target_length, mode='zero', up=1600, down=670):
     """
     Adjust the size of a time series tensor to a target length.
     mode (str): Padding mode. Options are:
@@ -43,10 +45,15 @@ def adjust_time_series_size(tensor, target_length, mode='zero'):
             padding = tensor[:, -1:, :].repeat(1, pad_size, 1)
         elif mode == 'balanced':
             # Balanced padding
-            indices = torch.linspace(0, current_length - 1, steps=target_length, device=tensor.device).long()
-            tensor = tensor[:, indices, :]
+            # indices = torch.linspace(0, current_length - 1, steps=target_length, device=tensor.device).long()
+            # tensor = tensor[:, indices, :]
+            # return tensor
+
+            device = tensor.device
+            signal = tensor.cpu().numpy()
+            upsampled_signal = resample_poly(signal, up=1600, down=670, axis=1)
+            tensor = torch.tensor(upsampled_signal, device=device, dtype=tensor.dtype)
             return tensor
-        #TODO! Use time series coeherent rule for extending
         else:
             raise ValueError(f"Unsupported padding mode: {mode}")
         return torch.cat([padding, tensor], dim=1) if mode == 'repeat_start' else torch.cat([tensor, padding], dim=1)
