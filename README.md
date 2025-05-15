@@ -7,8 +7,8 @@
 
 ## Naive Transformer implementation
 
-Simple Transformer Encoder with Sinusoidal positional encoding. Next steps could be:
-- Using different positional encodings
-- Reducing the number of transformer layers (at the moment with just 50 batches the model is able to learn) 
-
 - Results on RoboticArm available at [this notebook](notebooks/03.01-naiveTransformer.ipynb)
+
+## RoPe Position Encoding Transformer implementation
+
+- Results on RoboticArm available at [this notebook](notebooks/03.02-naiveTransformer-RoPe.ipynb)
