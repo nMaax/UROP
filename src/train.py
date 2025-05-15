@@ -17,8 +17,13 @@ def train_one_epoch(model, dataloader, optimizer, criterion, merge_strategy='def
     running_loss = 0.0  # Initialize running loss
 
     len_dataloader = len(dataloader)
-    if not break_at_batch:
+    if break_at_batch:
+        indices = np.random.choice(len_dataloader, break_at_batch, replace=False)
+        sampler = torch.utils.data.SubsetRandomSampler(indices)
+        dataloader = torch.utils.data.DataLoader(dataloader.dataset, batch_size=dataloader.batch_size, sampler=sampler)
+    else:
         break_at_batch = len_dataloader
+
     iter = dataloader
     if verbose == 1:
         iter = tqdm(dataloader, desc="Training", unit="batch") if verbose else dataloader
@@ -200,7 +205,7 @@ def train_model(name, model, criterion, optimizer, train_loader, val_loader, mer
         print(f"Epoch [{epoch + 1}/{num_epochs}] (Checkpoint Epoch: {adjusted_current_epoch + 1}) | Train Loss: {train_loss:.6f} | Val Loss: {val_loss:.6f} | Val AUC: {val_auc:.4f}")
         print(f"Time Spent: {epoch_time:.2f}s | ETA: {eta:.2f}s | Current Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
 
-        if (save_every and (epoch + 1) % save_every == 0) or (epoch == num_epochs - 1):
+        if save_every and (((epoch + 1) % save_every == 0) or (epoch == (num_epochs - 1))):
             # Save model checkpoint periodically with adjusted epoch
             save_model_checkpoint(save_dir, name, model, model_config, optimizer,
                                   adjusted_current_epoch + 1, train_losses, val_losses, val_aucs)
