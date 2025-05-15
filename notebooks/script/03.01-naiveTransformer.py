@@ -14,16 +14,17 @@ os.chdir("..")  # Go up one level to the UROP directory
 
 # Settings
 SEED = 1
-BATCH_SIZE = 128
+TRAIN_BATCH_SIZE = 1 # on-line learning
+TEST_BATCH_SIZE = 64
 NUM_WORKERS = 4
 LR = 1e-3
 
 # Model hyper-parameters
-PE_DROPOUT = 0.3
-TF_DROPOUT = 0.3
+PE_DROPOUT = 0.1
+TF_DROPOUT = 0.1
 D_MODEL = 64
 N_HEAD = 4
-NUM_LAYERS = 3
+NUM_LAYERS = 4
 DIM_FF = 128
 
 
@@ -45,8 +46,8 @@ full_train_source_dataset = LazyWindowedDataset(
 
 train_source_dataset, val_source_dataset = train_test_split(full_train_source_dataset)
 
-train_loader = DataLoader(train_source_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS, drop_last=True)
-val_loader = DataLoader(val_source_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS, drop_last=True)
+train_loader = DataLoader(train_source_dataset, batch_size=TRAIN_BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS, drop_last=True)
+val_loader = DataLoader(val_source_dataset, batch_size=TRAIN_BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS, drop_last=True)
 
 test_source_dataset = LazyWindowedDataset(
     root_dir="datasets/RoboticArm",
@@ -56,7 +57,7 @@ test_source_dataset = LazyWindowedDataset(
     window_size_ms=100,
     stride_ms=50,
 )
-test_loader = DataLoader(test_source_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS, drop_last=True)
+test_loader = DataLoader(test_source_dataset, batch_size=TEST_BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS, drop_last=True)
 
 
 import math
@@ -149,7 +150,7 @@ criterior = torch.nn.MSELoss()
 
 
 from torchinfo import summary
-summary(model, input_size=(BATCH_SIZE, 1600, 7))
+summary(model, input_size=(TRAIN_BATCH_SIZE, 1600, 7))
 
 
 from src import train_model, evaluate
@@ -166,6 +167,7 @@ try:
         num_epochs=1, 
         verbose=1,
         break_at_batch=50,
+        save_every=None,
     )
 except KeyboardInterrupt:
     print("Training interrupted by user.")
