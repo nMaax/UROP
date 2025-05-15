@@ -1,5 +1,5 @@
 # Ignore personal files
-notes.txt
+private_notes.txt
 
 # Ignore checkpoints, data and datasets
 checkpoints/
