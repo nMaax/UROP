@@ -13,7 +13,7 @@ os.chdir("..")  # Go up one level to the UROP directory
 
 
 # Settings
-SEED = 1
+SEED = None
 TRAIN_BATCH_SIZE = 1 # on-line learning
 TEST_BATCH_SIZE = 64
 NUM_WORKERS = 4
@@ -23,7 +23,7 @@ LR = 1e-3
 PE_DROPOUT = 0.1
 TF_DROPOUT = 0.1
 D_MODEL = 64
-N_HEAD = 4
+N_HEAD = 8
 NUM_LAYERS = 4
 DIM_FF = 128
 
@@ -32,7 +32,7 @@ import torch
 from torch.utils.data import DataLoader
 from src import LazyWindowedDataset, train_test_split
 
-torch.manual_seed(SEED)
+#torch.manual_seed(SEED)
 
 # Initialize Dataset
 full_train_source_dataset = LazyWindowedDataset(
@@ -162,12 +162,13 @@ try:
         criterion=criterior, 
         optimizer=optimizer, 
         train_loader=train_loader, 
-        val_loader=None, # Skip validation to speed up
+        val_loader=val_loader, # Skip validation to speed up
         merge_startegy='stack',
         num_epochs=1, 
         verbose=1,
-        break_at_batch=50,
-        save_every=None,
+        train_num_batches=50,
+        val_num_batches=50,
+        save_every=1,
     )
 except KeyboardInterrupt:
     print("Training interrupted by user.")

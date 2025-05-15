@@ -6,10 +6,10 @@ import numpy as np
 import torch
 from sklearn.metrics import roc_auc_score
 from collections import defaultdict
-from src.utils import minmax_normalize, z_score_normalize, flatten_and_concat, adjust_time_series_size
+from src.utils import minmax_normalize, stack_on_last_dim, z_score_normalize, flatten_and_concat, adjust_time_series_size
 from src.save import save_model_checkpoint
 
-def train_one_epoch(model, dataloader, optimizer, criterion, merge_strategy='default', break_at_batch=None, verbose=False):
+def train_one_epoch(model, dataloader, optimizer, criterion, merge_strategy='default', num_batches=None, verbose=False):
     """Train the model for one epoch"""
     device = next(model.parameters()).device  # Get the device of the model
     
@@ -17,18 +17,18 @@ def train_one_epoch(model, dataloader, optimizer, criterion, merge_strategy='def
     running_loss = 0.0  # Initialize running loss
 
     len_dataloader = len(dataloader)
-    if break_at_batch:
-        indices = np.random.choice(len_dataloader, break_at_batch, replace=False)
+    if num_batches:
+        indices = np.random.choice(len_dataloader, num_batches, replace=False)
         sampler = torch.utils.data.SubsetRandomSampler(indices)
         dataloader = torch.utils.data.DataLoader(dataloader.dataset, batch_size=dataloader.batch_size, sampler=sampler)
     else:
-        break_at_batch = len_dataloader
+        num_batches = len_dataloader
 
     iter = dataloader
     if verbose == 1:
         iter = tqdm(dataloader, desc="Training", unit="batch") if verbose else dataloader
 
-    for batch_idx, (mic, acc, gyro, labels) in enumerate(iter):
+    for batch_idx, (mic, acc, gyro, _) in enumerate(iter):
         if merge_strategy in {'default', 'flatten'}:
             # Normalize input tensors
             mic_norm = z_score_normalize(mic)
@@ -38,17 +38,17 @@ def train_one_epoch(model, dataloader, optimizer, criterion, merge_strategy='def
             # Flatten and concatenate inputs
             inputs = flatten_and_concat(mic_norm, acc_norm, gyro_norm).to(device)
         elif merge_strategy == 'stack':
+            # Adjust time series size for acc and gyro to match mic
+            acc_adjusted = adjust_time_series_size(acc, mic.shape[1], 'resample')
+            gyro_adjusted = adjust_time_series_size(gyro, mic.shape[1], 'resample')
+            
             # Normalize input tensors
             mic_norm = z_score_normalize(mic)
-            acc_norm = z_score_normalize(acc)
-            gyro_norm = z_score_normalize(gyro)
-
-            # Adjust time series size for acc and gyro to match mic
-            acc_adjusted = adjust_time_series_size(acc_norm, mic_norm.shape[1], 'balanced')
-            gyro_adjusted = adjust_time_series_size(gyro_norm, mic_norm.shape[1], 'balanced')
+            acc_norm = z_score_normalize(acc_adjusted)
+            gyro_norm = z_score_normalize(gyro_adjusted)
 
             # Stack inputs along the feature dimension
-            inputs = torch.cat([mic_norm, acc_adjusted, gyro_adjusted], dim=2).to(device)
+            inputs = stack_on_last_dim(mic_norm, acc_norm, gyro_norm).to(device)
         else:
             raise ValueError(f"Unknown merge_strategy: {merge_strategy}")
 
@@ -70,12 +70,12 @@ def train_one_epoch(model, dataloader, optimizer, criterion, merge_strategy='def
         if verbose >=2 and batch_idx % (10 if verbose == 2 else 1):
             print(f"[Batch {batch_idx + 1}/{len_dataloader}] Loss: {loss.item():.6f}")
 
-        if batch_idx >= break_at_batch:
+        if batch_idx >= num_batches:
             break
 
-    return running_loss / break_at_batch  # Return average loss for the epoch
+    return running_loss / num_batches  # Return average loss for the epoch
 
-def evaluate(model, dataloader, criterion, sensors_to_test=None, merge_strategy='default', verbose=False):
+def evaluate(model, dataloader, criterion, sensors_to_test=None, merge_strategy='default', num_batches=None, verbose=False):
     """Function to evaluate the model on a validation dataset"""
     device = next(model.parameters()).device  # Get the device of the model
     
@@ -89,6 +89,13 @@ def evaluate(model, dataloader, criterion, sensors_to_test=None, merge_strategy=
 
     # Wrap the dataloader with tqdm if verbose is enabled
     len_dataloader = len(dataloader)
+    if num_batches:
+        indices = np.random.choice(len_dataloader, num_batches, replace=False)
+        sampler = torch.utils.data.SubsetRandomSampler(indices)
+        dataloader = torch.utils.data.DataLoader(dataloader.dataset, batch_size=dataloader.batch_size, sampler=sampler)
+    else:
+        num_batches = len_dataloader
+    
     iter = dataloader
     if verbose == 1:
         iter = tqdm(dataloader, desc="Evaluation", unit="batch") if verbose else dataloader
@@ -168,7 +175,7 @@ def evaluate(model, dataloader, criterion, sensors_to_test=None, merge_strategy=
 
 def train_model(name, model, criterion, optimizer, train_loader, val_loader, merge_startegy='default',
                 start_epoch=0, num_epochs=10, save_every=1, 
-                save_dir='checkpoints', verbose=True, break_at_batch=None):
+                save_dir='checkpoints', verbose=True, train_num_batches=None, val_num_batches=None):
     """Function to train the model for multiple epochs"""
     train_losses, val_losses, val_aucs = [], [], []  # Initialize lists to store metrics
 
@@ -186,11 +193,11 @@ def train_model(name, model, criterion, optimizer, train_loader, val_loader, mer
         start_time = time.time()
 
         # Train for one epoch and evaluate on validation set
-        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, merge_startegy, break_at_batch, verbose)
+        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, merge_startegy, train_num_batches, verbose)
         if val_loader:
-            val_loss, val_auc = evaluate(model, val_loader, criterion, ['mic', 'acc', 'gyro'], merge_startegy, verbose)
+            val_loss, val_auc = evaluate(model, val_loader, criterion, ['mic', 'acc', 'gyro'], merge_startegy, val_num_batches, verbose)
         else:
-            val_loss, val_auc = 0.0, 0.0
+            val_loss, val_auc = np.nan, np.nan
 
         # End timing the epoch
         epoch_time = time.time() - start_time

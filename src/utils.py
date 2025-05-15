@@ -20,6 +20,10 @@ def flatten_and_concat(*tensors):
     """Flatten tensors and concatenate them along the feature dimension"""
     return torch.cat([t.view(t.size(0), -1) for t in tensors], dim=1).unsqueeze(-1) # Will return (batch, time), without dim
 
+def stack_on_last_dim(*tensors):
+    """Concat tensors along the last dimension (feature dimension)"""
+    return torch.cat(tensors, dim=-1)
+
 def adjust_time_series_size(tensor, target_length, mode='zero', up=1600, down=670):
     """
     Adjust the size of a time series tensor to a target length.
@@ -44,11 +48,10 @@ def adjust_time_series_size(tensor, target_length, mode='zero', up=1600, down=67
         elif mode == 'repeat_end':
             padding = tensor[:, -1:, :].repeat(1, pad_size, 1)
         elif mode == 'balanced':
-            # Balanced padding
-            # indices = torch.linspace(0, current_length - 1, steps=target_length, device=tensor.device).long()
-            # tensor = tensor[:, indices, :]
-            # return tensor
-
+            indices = torch.linspace(0, current_length - 1, steps=target_length, device=tensor.device).long()
+            tensor = tensor[:, indices, :]
+            return tensor
+        elif mode == 'resample':
             device = tensor.device
             signal = tensor.cpu().numpy()
             upsampled_signal = resample_poly(signal, up=1600, down=670, axis=1)
