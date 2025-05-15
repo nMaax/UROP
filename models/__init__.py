@@ -1,1 +1,2 @@
 from .autoencoder import BaselineAutoencoder
+from .transformer import RoPeTimeSeriesTransformer
