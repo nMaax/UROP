@@ -4,14 +4,13 @@
 
 ### Prerequisites
 
-Make sure you have Python installed on your system.
+Make sure you have Python (3.10+) installed on your system.
 
-* Python 3.10+
-    ```bash
-    python --version
-    # or
-    python3 --version
-    ```
+```bash
+python --version
+# or
+python3 --version
+```
 
 ### Cloning the Repository
 
