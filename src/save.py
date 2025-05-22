@@ -1,7 +1,7 @@
 import torch
 import os
 
-def save_model_checkpoint(save_dir, name, model, config, optimizer, epoch, train_losses, val_losses, val_aucs):
+def save_model_checkpoint(save_dir, name, model, config, optimizer, epoch, train_losses, val_losses, val_aucs, generator=None):
     """Save the model checkpoint"""
     
     if not os.path.exists(save_dir):
@@ -18,6 +18,7 @@ def save_model_checkpoint(save_dir, name, model, config, optimizer, epoch, train
         'train_losses': train_losses,
         'val_losses': val_losses,
         'val_aucs': val_aucs,
+        'generator': generator,
     }
 
     checkpoint_path = os.path.join(save_dir, f"{name}_{model_class_name}_epoch_{epoch}.pt")
@@ -55,4 +56,4 @@ def load_model_checkpoint(checkpoint_path, model_class, optimizer_class=None):
         optimizer = None  # If no optimizer state is saved, return None
 
     # Return model, optimizer, and saved training metrics
-    return model, optimizer, checkpoint['epoch'], checkpoint['train_losses'], checkpoint['val_losses'], checkpoint['val_aucs']
+    return model, optimizer, checkpoint['epoch'], checkpoint['train_losses'], checkpoint['val_losses'], checkpoint['val_aucs'], checkpoint['generator']
