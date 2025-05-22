@@ -56,4 +56,4 @@ def load_model_checkpoint(checkpoint_path, model_class, optimizer_class=None):
         optimizer = None  # If no optimizer state is saved, return None
 
     # Return model, optimizer, and saved training metrics
-    return model, optimizer, checkpoint['epoch'], checkpoint['train_losses'], checkpoint['val_losses'], checkpoint['val_aucs'], checkpoint['generator']
+    return model, optimizer, checkpoint.get('epoch', 0), checkpoint.get('train_losses', []), checkpoint.get('val_losses', []), checkpoint.get('val_aucs', []), checkpoint.get('generator', None)
