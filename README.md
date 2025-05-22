@@ -101,4 +101,4 @@ python -m utils.download_and_extract
 - Results on BrushlessMotor available at [this notebook](notebooks/04.02-naiveTransformer-RoPe-brushless-motor-eval.ipynb)
 - Results on RoboticArm available at [this notebook](notebooks/04.12-naiveTransformer-RoPe-robotic-arm-eval.ipynb)
 
-> An spreadsheet with a summary of results is available [here](https://docs.google.com/spreadsheets/d/1ulYtD9WzXzzn-zB499xZ_EkRmIqcj1fGJuZP-UhYN2Y/edit?usp=sharing)
+> A spreadsheet with a summary of results is available [here](https://docs.google.com/spreadsheets/d/1ulYtD9WzXzzn-zB499xZ_EkRmIqcj1fGJuZP-UhYN2Y/edit?usp=sharing)
