@@ -82,14 +82,16 @@ make data
 
 this will create a new folder `data` withinin the project ready-to-use with the Dataset object you can find in `src\` directory, and a folder `datasets`, which contains the uzipped content of `data`.
 
+Alternatively, you can manually download and extract the dataset using:
+
+```bash
+python -m utils.download_and_extract
+```
+
 ## Reproduced Result on Baseline Autoencoder
 
 - Results on BrushlessMotor are available at [this notebook](notebooks/02.02-baseline-autoencoder-brushless-motor-eval.ipynb)
 - Results on RoboticArm are available at [this notebook](notebooks/02.12-baseline-autoencoder-robotic-arm-eval.ipynb)
-
-## Naive Transformer implementation
-
-- Results on RoboticArm available at [this notebook](notebooks/03.01-naiveTransformer.ipynb)
 
 ## RoPe Position Encoding Transformer implementation
 
