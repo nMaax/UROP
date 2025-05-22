@@ -33,6 +33,45 @@ make install
 
 This will setup automatically a venv for you, while installing all dependencies in requirements.txt automatically.
 
+Alternatively, you can set up the virtual environment manually:
+
+1. Create a new virtual environment:
+    ```bash
+    python -m venv venv
+    ```
+
+2. Activate the virtual environment:
+    - On Windows:
+        ```bash
+        .\venv\Scripts\activate
+        ```
+    - On Unix-like systems (MacOS/Linux):
+        ```bash
+        source venv/bin/activate
+        ```
+
+3. Install the required packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+### Using Conda
+
+1. Create a new conda environment:
+    ```bash
+    conda create -n urop python=3.10
+    ```
+
+2. Activate the conda environment:
+    ```bash
+    conda activate urop
+    ```
+
+3. Install the required packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
 ### Download dataset
 
 You can automatically download the dataset using
