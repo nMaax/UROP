@@ -191,6 +191,7 @@ def train_model_contrastive(
     return model, train_losses
 
 
+import types
 from models import RoPeTimeSeriesTransformer
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -203,7 +204,21 @@ config = {
     'dim_feedforward': DIM_FF,
     'dropout': TF_DROPOUT,
 }
+# By default, RopeTimeSeriesTransformers includes a bottleneck output proejction, for our use we will need to remove it
 transformer = RoPeTimeSeriesTransformer.from_config(config).to(device)
+# Remove output projection layer
+delattr(transformer, 'output_proj')
+# Override forward method to skip output projection
+def new_forward(self, x):
+    x = self.pos_encoder(x)
+    x = self.input_proj(x) 
+    x = self.transformer_encoder(x)
+    return x
+# types.MethodType binds the new_forward function to the transformer instance
+# This makes new_forward a method of the transformer object, with proper 'self' binding
+# It's equivalent to defining the method directly in the class, but does it dynamically at runtime
+transformer.forward = types.MethodType(new_forward, transformer)
+
 constrastive_model = MaskedContrastiveModel(transformer_model=transformer, dim_ff=DIM_FF, dim_out=32).to(device)
 contrastive_optimizer = torch.optim.AdamW(constrastive_model.parameters())
 
