@@ -9,7 +9,7 @@ from collections import defaultdict
 from src.utils import minmax_normalize, stack_on_last_dim, z_score_normalize, flatten_and_concat, adjust_time_series_size
 from src.save import save_model_checkpoint
 
-def train_one_epoch(model, dataloader, optimizer, criterion, merge_strategy='default', num_batches=None, verbose=False):
+def train_one_epoch(model, dataloader, optimizer, criterion, merge_strategy='default', num_batches=None, verbose=False, generator=None):
     """Train the model for one epoch"""
     device = next(model.parameters()).device  # Get the device of the model
     
@@ -18,7 +18,7 @@ def train_one_epoch(model, dataloader, optimizer, criterion, merge_strategy='def
 
     len_dataloader = len(dataloader)
     if num_batches:
-        indices = np.random.choice(len_dataloader, num_batches, replace=False)
+        indices = torch.randperm(len_dataloader, generator=generator)[:num_batches]
         sampler = torch.utils.data.SubsetRandomSampler(indices)
         dataloader = torch.utils.data.DataLoader(dataloader.dataset, batch_size=dataloader.batch_size, sampler=sampler)
     else:
@@ -75,7 +75,7 @@ def train_one_epoch(model, dataloader, optimizer, criterion, merge_strategy='def
 
     return running_loss / num_batches  # Return average loss for the epoch
 
-def evaluate(model, dataloader, criterion, sensors_to_test=None, merge_strategy='default', num_batches=None, verbose=False):
+def evaluate(model, dataloader, criterion, sensors_to_test=None, merge_strategy='default', num_batches=None, verbose=False, generator=None):
     """Function to evaluate the model on a validation dataset"""
     device = next(model.parameters()).device  # Get the device of the model
     
@@ -90,7 +90,7 @@ def evaluate(model, dataloader, criterion, sensors_to_test=None, merge_strategy=
     # Wrap the dataloader with tqdm if verbose is enabled
     len_dataloader = len(dataloader)
     if num_batches:
-        indices = np.random.choice(len_dataloader, num_batches, replace=False)
+        indices = torch.randperm(len_dataloader, generator=generator)[:num_batches]
         sampler = torch.utils.data.SubsetRandomSampler(indices)
         dataloader = torch.utils.data.DataLoader(dataloader.dataset, batch_size=dataloader.batch_size, sampler=sampler)
     else:
@@ -175,7 +175,7 @@ def evaluate(model, dataloader, criterion, sensors_to_test=None, merge_strategy=
 
 def train_model(name, model, criterion, optimizer, train_loader, val_loader, merge_startegy='default',
                 start_epoch=0, num_epochs=10, save_every=1, 
-                save_dir='checkpoints', verbose=True, train_num_batches=None, val_num_batches=None):
+                save_dir='checkpoints', verbose=True, train_num_batches=None, val_num_batches=None, generator=None):
     """Function to train the model for multiple epochs"""
     train_losses, val_losses, val_aucs = [], [], []  # Initialize lists to store metrics
 
@@ -193,9 +193,9 @@ def train_model(name, model, criterion, optimizer, train_loader, val_loader, mer
         start_time = time.time()
 
         # Train for one epoch and evaluate on validation set
-        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, merge_startegy, train_num_batches, verbose)
+        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, merge_startegy, train_num_batches, verbose, generator)
         if val_loader:
-            val_loss, val_auc = evaluate(model, val_loader, criterion, ['mic', 'acc', 'gyro'], merge_startegy, val_num_batches, verbose)
+            val_loss, val_auc = evaluate(model, val_loader, criterion, ['mic', 'acc', 'gyro'], merge_startegy, val_num_batches, verbose, generator)
         else:
             val_loss, val_auc = np.nan, np.nan
 
