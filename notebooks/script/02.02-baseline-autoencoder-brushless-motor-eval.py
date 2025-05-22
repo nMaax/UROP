@@ -44,7 +44,7 @@ from src import evaluate, load_model_checkpoint
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model, _, _, _, _, _ = load_model_checkpoint("checkpoints/BrushlessMotorBaseline.pt", BaselineAutoencoder, optimizer_class=None)
+model, _, _, _, _, _, _ = load_model_checkpoint("checkpoints/BrushlessMotorBaseline.pt", BaselineAutoencoder, optimizer_class=None)
 model.to(device)
 criterion = torch.nn.MSELoss()
 
