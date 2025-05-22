@@ -93,6 +93,12 @@ python -m utils.download_and_extract
 - Results on BrushlessMotor are available at [this notebook](notebooks/02.02-baseline-autoencoder-brushless-motor-eval.ipynb)
 - Results on RoboticArm are available at [this notebook](notebooks/02.12-baseline-autoencoder-robotic-arm-eval.ipynb)
 
-## RoPe Position Encoding Transformer implementation
+## Transformer-based implementation with RoPe Positional Encoding (my contribution)
 
-- Results on RoboticArm available at [this notebook](notebooks/03.02-naiveTransformer-RoPe.ipynb)
+- Model architecutre is available [here](models/transformer.py)
+- Training of such model on BrushlessMotor is available at [this notebook](notebooks/04.01-naiveTransformer-RoPe-brushless-motor-train.ipynb)
+- Training of such model on RoboticArm is available at [this notebook](notebooks/04.11-naiveTransformer-RoPe-robotic-arm-train.ipynb)
+- Results on BrushlessMotor available at [this notebook](notebooks/04.02-naiveTransformer-RoPe-brushless-motor-eval.ipynb)
+- Results on RoboticArm available at [this notebook](notebooks/04.12-naiveTransformer-RoPe-robotic-arm-eval.ipynb)
+
+> An spreadsheet with a summary of results is available [here](https://docs.google.com/spreadsheets/d/1ulYtD9WzXzzn-zB499xZ_EkRmIqcj1fGJuZP-UhYN2Y/edit?usp=sharing)
