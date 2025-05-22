@@ -2,7 +2,7 @@
 
 ## Installation
 
-### Prerequisites
+### 1. Prerequisites
 
 Make sure you have Python (3.10+) installed on your system.
 
@@ -12,7 +12,7 @@ python --version
 python3 --version
 ```
 
-### Cloning the Repository
+### 2. Cloning the Repository
 
 1.  Clone the repository:
     ```bash
@@ -23,7 +23,7 @@ python3 --version
     cd UROP
     ```
 
-### Setting up a Virtual Environment
+### 3. Setting up a Virtual Environment
 
 It's highly recommended to use a virtual environment to manage project dependencies. You can easily do it using Make
 
@@ -33,7 +33,7 @@ make install
 
 This will setup automatically a venv for you, while installing all dependencies in requirements.txt automatically.
 
-Alternatively, you can set up the virtual environment manually:
+Alternatively, you can set up the virtual environment manually using:
 
 1. Create a new virtual environment:
     ```bash
@@ -55,7 +55,7 @@ Alternatively, you can set up the virtual environment manually:
     pip install -r requirements.txt
     ```
 
-### Using Conda
+As a third option, one can use conda as following:
 
 1. Create a new conda environment:
     ```bash
@@ -72,7 +72,7 @@ Alternatively, you can set up the virtual environment manually:
     pip install -r requirements.txt
     ```
 
-### Download dataset
+### 4. Download dataset
 
 You can automatically download the dataset using
 
@@ -80,7 +80,7 @@ You can automatically download the dataset using
 make data
 ```
 
-this will create a new folder `data` withinin the project ready-to-use with the Dataset object you can find in `src\` directory.
+this will create a new folder `data` withinin the project ready-to-use with the Dataset object you can find in `src\` directory, and a folder `datasets`, which contains the uzipped content of `data`.
 
 ## Reproduced Result on Baseline Autoencoder
 
