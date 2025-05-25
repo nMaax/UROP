@@ -99,6 +99,24 @@ The proposed approach consists of a traditional Transformer based architecture, 
 
 The transformer-based model allowed to reduce significantly the size of model compared to the baseline autoencoder. Altought anomaly detection capacities are sub-optimal compared to the later.
 
+More specifically, the following setting were used:
+
+```python
+# Dataset hyper-parameters
+WINDOW_SIZE_MS=100
+STRIDE_MS=50
+
+# Settings
+TRAIN_BATCH_SIZE = 1 # on-line learning
+LR = 1e-3  # with AdamW
+
+# Model hyper-parameters
+D_MODEL = 64
+N_HEAD = 8
+NUM_LAYERS = 4
+DIM_FF = 128
+```
+
 Promising future work could involve applying techniques of contrastive learning to a similar architecture, as attempted, but not yet concluded in [this notebook](notebooks/05.01-contrastive-learning-transformer.ipynb), or adapting existing SOTA techniques like [TranAD, Tuli et. al.](https://arxiv.org/abs/2201.07284) to fit within micro-controllers settings.
 
 ### Quick-links to notebooks and results
