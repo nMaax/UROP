@@ -14,11 +14,14 @@ python3 --version
 
 ### 2. Cloning the Repository
 
-1.  Clone the repository:
+1. Clone the repository:
+
     ```bash
     git clone https://github.com/nMaax/UROP
     ```
-2.  Navigate to the project directory:
+
+2. Navigate to the project directory:
+
     ```bash
     cd UROP
     ```
@@ -36,21 +39,26 @@ This will setup automatically a venv for you, while installing all dependencies 
 Alternatively, you can set up the virtual environment manually using:
 
 1. Create a new virtual environment:
+
     ```bash
     python -m venv venv
     ```
 
 2. Activate the virtual environment:
     - On Windows:
+  
         ```bash
         .\venv\Scripts\activate
         ```
+
     - On Unix-like systems (MacOS/Linux):
+  
         ```bash
         source venv/bin/activate
         ```
 
 3. Install the required packages:
+
     ```bash
     pip install -r requirements.txt
     ```
@@ -58,16 +66,19 @@ Alternatively, you can set up the virtual environment manually using:
 As a third option, one can use conda as following:
 
 1. Create a new conda environment:
+
     ```bash
     conda create -n urop python=3.10
     ```
 
 2. Activate the conda environment:
+
     ```bash
     conda activate urop
     ```
 
 3. Install the required packages:
+
     ```bash
     pip install -r requirements.txt
     ```
