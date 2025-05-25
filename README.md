@@ -107,7 +107,7 @@ WINDOW_SIZE_MS=100
 STRIDE_MS=50
 
 # Settings
-TRAIN_BATCH_SIZE = 1 # on-line learning
+TRAIN_BATCH_SIZE = 1 # on-line learning, sampling just 40-50 batches per epoch
 LR = 1e-3  # with AdamW
 
 # Model hyper-parameters
