@@ -95,6 +95,14 @@ python -m utils.download_and_extract
 
 ## Transformer-based implementation with RoPe Positional Encoding (my contribution)
 
+The proposed approach consists of a traditional Transformer based architecture, leveraging an hybrid positional encoding (RoPe + Sinusoidal). The different windows retrived from the dataset are stacked on the last dimension, obtaining batches of the following shape ```[Batch Size, Time, Features] = [_, 1600, 7]```. Since the accelerometer and gyroscope are not sampled at 16k, we performed a re-sampling processing to make all the sensors fit on 1600. Given the input we apply a positional encoding on the time dimension `T`: the technique employed is an hybrid apporach between RoPe, which is used for the accelerometer and gyroscope dimension, and a sinusoidal on the microphone dimension. This peculiar choice is due to the fact that RoPe: (i) can only work on even number of dimnesions; (ii) works better on dimensionally meaningful features---in this case spatial ones (x-y-z).
+
+The transformer-based model allowed to reduce significantly the size of model compared to the baseline autoencoder. Altought anomaly detection capacities are sub-optimal compared to the later.
+
+Promising future work could involve applying techniques of contrastive learning to a similar architecture, as attempted, but not yet concluded in [this notebook](notebooks/05.01-contrastive-learning-transformer.ipynb), or adapting existing SOTA techniques like [TranAD, Tuli et. al.](https://arxiv.org/abs/2201.07284) to fit within micro-controllers settings.
+
+### Quick-links to notebooks and results
+
 - Model architecutre is available [here](models/transformer.py)
 - Training of such model on BrushlessMotor is available at [this notebook](notebooks/04.01-naiveTransformer-RoPe-brushless-motor-train.ipynb)
 - Training of such model on RoboticArm is available at [this notebook](notebooks/04.11-naiveTransformer-RoPe-robotic-arm-train.ipynb)
